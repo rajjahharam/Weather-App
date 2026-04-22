@@ -257,6 +257,12 @@
   .h-12 {
     height: calc(var(--spacing) * 12);
   }
+  .h-77 {
+    height: calc(var(--spacing) * 77);
+  }
+  .h-77\.5 {
+    height: calc(var(--spacing) * 77.5);
+  }
   .h-\[310px\] {
     height: 310px;
   }
