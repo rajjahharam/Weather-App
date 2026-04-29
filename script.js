@@ -26,9 +26,9 @@ const iconMapping = {
   "Snow":                        "https://img.icons8.com/3d-fluency/94/snowstorm.png",
   "Blowing snow":                "https://img.icons8.com/3d-fluency/94/snowstorm.png",
   "Blizzard":                    "https://img.icons8.com/3d-fluency/94/snowstorm.png",
-  "Fog":                         "https://img.icons8.com/3d-fluency/94/fog.png",
-  "Freezing fog":                "https://img.icons8.com/3d-fluency/94/fog.png",
-  "Mist":                        "https://img.icons8.com/3d-fluency/94/fog.png",
+  "Fog":                         "https://img.icons8.com/?size=100&id=qHIFUjYhnsFU&format=png&color=000000",
+  "Freezing fog":                "https://img.icons8.com/?size=100&id=qHIFUjYhnsFU&format=png&color=000000",
+  "Mist":                        "https://img.icons8.com/?size=100&id=qHIFUjYhnsFU&format=png&color=000000",
 };
 const fallbackIcon = "https://img.icons8.com/3d-fluency/94/partly-cloudy-day.png";
 const getIcon = c => iconMapping[c] ?? fallbackIcon;
@@ -111,7 +111,7 @@ function renderTodayForecast(data) {
   const icon  = getIcon(cur.condition.text);
 
   let html = `
-    <div class="flex flex-col gap-4 bg-[#c0d8f0] rounded-3xl p-6 text-[#1a1a1a] shadow-xl flex-shrink-0 font-sans" style="min-width:16rem;width:16rem;">
+    <div class="flex flex-col gap-4 bg-[#c0d8f0] rounded-3xl p-6 text-[#1a1a1a] shadow-xl flex-shrink-0 font-sans" style="min-width:16rem;width:16rem;height:315px">
       <div class="flex justify-between items-center bg-[#94b2d1] rounded-t-3xl px-4 py-2 -mt-6 -mx-6">
         <span class="font-bold text-base">${day}</span>
         <span class="font-bold my-font text-base">${time}</span>
@@ -142,7 +142,7 @@ function renderSingleDayForecast(d) {
   const icon = getIcon(d.day.condition.text);
 
   forecastContainer.innerHTML = `
-    <div class="flex flex-col gap-4 bg-[#c0d8f0] rounded-3xl p-6 text-[#1a1a1a] shadow-xl flex-shrink-0 font-sans" style="min-width:16rem;width:16rem;">
+    <div class="flex flex-col gap-4 bg-[#c0d8f0] rounded-3xl p-6 text-[#1a1a1a] shadow-xl flex-shrink-0 font-" style="min-width:16rem;width:16rem;">
       <div class="flex justify-between items-center bg-[#94b2d1] rounded-t-3xl px-4 py-2 -mt-6 -mx-6">
         <span class="font-bold text-base">${day}</span>
         <span class="font-bold my-font text-base">Tomorrow</span>
@@ -173,7 +173,7 @@ function buildMiniCard(d) {
   const day  = date.toLocaleDateString("en-US", { weekday: "short" });
   const icon = getIcon(d.day.condition.text);
   return `
-    <div class="mini-card flex flex-col items-center justify-between rounded-[2.5rem] py-7 px-3 shadow-md flex-shrink-0" style="min-width:80px;width:84px;min-height:180px;">
+    <div class="mini-card flex flex-col items-center justify-between rounded-[2.5rem] py-7 px-3 shadow-md flex-shrink-0" style="min-width:80px;width:84px;min-height:180px;height:320px">
       <div class="flex flex-col items-center gap-2">
         <span class="day-label text-[13px] font-semibold uppercase tracking-wider">${day}</span>
         <div style="width:36px;border-top:1px solid var(--border)"></div>
