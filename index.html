@@ -1,193 +1,217 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather App</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
-        integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="src/input.css">
-    <link rel="stylesheet" href="src/output.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weather App</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-base:    #0c0c0c;
+      --bg-panel:   #111111;
+      --bg-card:    #1a1a1a;
+      --bg-input:   #262626;
+      --text-pri:   #ffffff;
+      --text-sec:   #9ca3af;
+      --text-muted: #6b7280;
+      --border:     #2a2a2a;
+      --accent:     #3b82f6;
+      --map-land:   #2a2a2a;
+      --map-stroke: #3a3a3a;
+      --map-hover:  #4a7fa8;
+      --map-active: #3b82f6;
+      --rain-bar:   rgba(147,197,253,0.45);
+      --rain-hover: rgba(147,197,253,0.9);
+    }
+    [data-theme="light"] {
+      --bg-base:    #eef2f7;
+      --bg-panel:   #ffffff;
+      --bg-card:    #f4f7fb;
+      --bg-input:   #e4eaf2;
+      --text-pri:   #0f172a;
+      --text-sec:   #475569;
+      --text-muted: #94a3b8;
+      --border:     #dde3ec;
+      --accent:     #2563eb;
+      --map-land:   #c8d6e5;
+      --map-stroke: #b0bfce;
+      --map-hover:  #60a5fa;
+      --map-active: #2563eb;
+      --rain-bar:   rgba(59,130,246,0.3);
+      --rain-hover: rgba(59,130,246,0.75);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; }
+    .my-font { font-family: 'Orbitron', sans-serif; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg-base); color: var(--text-pri); transition: background 0.3s, color 0.3s; }
+
+    /* Search */
+    #search-input { background: var(--bg-input); color: var(--text-pri); border: none; outline: none; transition: background 0.3s; }
+    #search-input::placeholder { color: var(--text-muted); }
+    #search-dropdown { background: var(--bg-card); border: 1px solid var(--border); }
+    .suggestion-item { color: var(--text-pri); border-bottom: 1px solid var(--border); }
+    .suggestion-item:hover { background: var(--bg-input); }
+
+    /* Forecast */
+    #forecast-container { background: var(--bg-panel); border: 1px solid var(--border); scrollbar-width: none; }
+    #forecast-container::-webkit-scrollbar { display: none; }
+
+    /* Mini cards */
+    .mini-card { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-pri); flex-shrink: 0; }
+    .mini-card .day-label { color: var(--text-sec); }
+
+    /* Right panels */
+    .right-panel { background: var(--bg-panel); border: 1px solid var(--border); }
+
+    /* Rain chart */
+    #rain-bars { border-left: 1px solid var(--border); }
+    .rain-bar-col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+    .rain-bar { width: 20px; background: var(--rain-bar); border-radius: 5px 5px 0 0; transition: height 0.7s cubic-bezier(.4,0,.2,1), background 0.2s; cursor: pointer; min-height: 4px; }
+    .rain-bar:hover { background: var(--rain-hover); }
+
+    /* City cards */
+    .city-card { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-pri); cursor: pointer; transition: border-color 0.2s, transform 0.15s; }
+    .city-card:hover { border-color: var(--accent); transform: translateX(3px); }
+
+    /* Map */
+    #world-map-container { position: relative; background: var(--bg-panel); border-radius: 1.25rem; overflow: hidden; border: 1px solid var(--border); }
+    #world-map-container svg { width: 100%; height: 100%; display: block; }
+    .map-tooltip { position: absolute; background: rgba(15,23,42,0.92); color: #e2e8f0; padding: 3px 9px; border-radius: 6px; font-size: 11px; pointer-events: none; display: none; z-index: 20; white-space: nowrap; }
+    .map-btn { width: 26px; height: 26px; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-pri); border-radius: 7px; cursor: pointer; font-size: 10px; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+    .map-btn:hover { background: var(--bg-input); }
+
+    /* Spinner */
+    .spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid rgba(255,255,255,0.2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Cities scrollbar */
+    #cities-scroll { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+    #cities-scroll::-webkit-scrollbar { width: 3px; }
+    #cities-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    /* Tabs */
+    .tab-btn { background: none; border: none; cursor: pointer; padding-bottom: 4px; font-family: 'Inter', sans-serif; }
+
+    /* Wide map overlay */
+    #map-wide-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; display: none; align-items: center; justify-content: center; }
+    #map-wide-overlay.open { display: flex; }
+    #map-wide-inner { background: var(--bg-panel); border-radius: 1.5rem; border: 1px solid var(--border); width: 90vw; height: 80vh; position: relative; overflow: hidden; }
+  </style>
 </head>
+<body>
 
-<body class="m-0 p-0 bg-[#0c0c0c]">
-    <!-- Nav-Bar -->
-    <header class="w-full text-white">
-        <nav class="flex flex-row items-center justify-between px-8 py-4 gap-8">
-            <!-- Notification and Location -->
-            <div class="flex items-center gap-6">
-                <i class="fa-solid fa-bell text-gray-400 hover:text-white cursor-pointer"></i>
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-location-dot text-sm"></i>
-                    <span class="text-sm font-medium whitespace-nowrap">Seattle, Australia</span>
-                </div>
-            </div>
-            <!-- Search -->
-            <div class="relative flex-1 max-w-2xl">
-                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <i class="fa-solid fa-magnifying-glass text-gray-500"></i>
-                </div>
-                <input type="text" placeholder="Search city..."
-                    class="block w-full pl-11 pr-4 py-2 bg-neutral-800 border-none rounded-xl text-sm focus:ring-1 focus:ring-gray-500 outline-none">
-            </div>
-            <!-- Theme -->
-            <div class="flex items-center gap-6 shrink-0">
-                <div class="flex bg-neutral-800 p-1 rounded-full items-center">
-                    <button class="p-1.5 px-2 rounded-full">
-                        <i class="fa-regular fa-sun text-xs text-gray-400"></i></button>
-                    <button class="p-1.5 px-2 bg-blue-100 rounded-full text-black shadow-sm">
-                        <i class="fa-solid fa-moon text-xs"></i></button>
-                </div>
-            </div>
-        </nav>
-    </header>
-
-    <main>
-        <div class="flex justify-between items-center mb-5 ml-6 mr-6">
-            <div class="flex gap-8">
-                <button class="text-xl text-gray-400 hover:text-white transition-colors cursor-pointer">Today</button>
-                <button class="text-xl text-gray-400 hover:text-white cursor-pointer">Tomorrow</button>
-                <button class="text-xl text-gray-400 hover:text-white cursor-pointer">Next 7
-                    days</button>
-            </div>
-            <!-- Toggle Forecast/Air Quality -->
-            <div class="flex items-center gap-6 shrink-0">
-                <div class="flex bg-zinc-800 p-1 rounded-full items-center">
-                    <button class="p-1.5 px-2 rounded-full bg-blue-100 text-black font-bold text-xs">
-                        Forecast</button>
-                    <button class="p-1.5 px-2 rounded-full text-gray-500 font-semibold shadow-sm text-xs">Air Quality
-                    </button>
-                </div>
-            </div>
+  <!-- NAVBAR -->
+  <header class="w-full">
+    <nav class="flex items-center justify-between px-8 py-4 gap-8">
+      <div class="flex items-center gap-2 shrink-0">
+        <i class="fa-solid fa-location-dot text-sm" style="color:var(--accent)"></i>
+        <span id="location-display" class="text-sm font-semibold whitespace-nowrap"></span>
+      </div>
+      <div class="relative flex-1 max-w-2xl">
+        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+          <i class="fa-solid fa-magnifying-glass" style="color:var(--text-muted)"></i>
         </div>
-        <!-- Week -->
-        <div class="flex items-center p-8 bg-[#111111] font-['Inter']">
-            <div class="flex flex-col gap-4 bg-[#c0d8f0] rounded-3xl p-6 w-[280px] text-[#1a1a1a] font-sans shadow-xl">
-                <div class="flex justify-between items-center bg-[#94b2d1] rounded-t-3xl px-4 py-2 -mt-6 -mx-6">
-                    <span class="font-bold text-lg">Monday</span>
-                    <span class="font-bold my-font text-lg">11:42 PM</span>
-                </div>
-                <div class="flex justify-between items-center py-2">
-                    <div class="flex flex-col">
-                        <span class="text-7xl font-bold my-font tracking-tighter">16°</span>
-                    </div>
-                    <div class="relative">
-                        <img width="80" height="80" src="https://img.icons8.com/3d-fluency/94/summer.png"
-                            alt="weather-icon" class="drop-shadow-lg" />
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-y-1 text-[13px] leading-tight font-medium">
-                    <div class="flex flex-col">
-                        <span class="opacity-60">Real Feel</span>
-                        <span class="font-bold my-font">18°</span>
-                    </div>
-                    <div class="flex flex-col">
-                        <span class="opacity-60">Wind</span>
-                        <span class="font-bold my-font">N-E, 5-8 km/h</span>
-                    </div>
-                    <div class="flex flex-col">
-                        <span class="opacity-60">Pressure</span>
-                        <span class="font-bold my-font">1000MB</span>
-                    </div>
-                    <div class="flex flex-col">
-                        <span class="opacity-60">Sunrise</span>
-                        <span class="font-bold my-font">6:02 AM</span>
-                    </div>
-                    <div class="flex flex-col">
-                        <span class="opacity-60">Humidity</span>
-                        <span class="font-bold my-font">51%</span>
-                    </div>
-                    <div class="flex flex-col">
-                        <span class="opacity-60">Sunset</span>
-                        <span class="font-bold my-font">9:18 PM</span>
-                    </div>
-                </div>
-            </div>
-
-            <div
-                class="flex flex-col items-center justify-between w-22.5 h-77.5 py-8 bg-[#1a1a1a] text-white rounded-[2.5rem] border border-gray-800 shadow-lg ml-6 font-['Inter']">
-                <div class="flex flex-col items-center gap-3 ">
-                    <span class="text-lg font-semibold opacity-60 uppercase tracking-wider">Tue</span>
-                    <div class="w-10 border-t border-white/10">
-                    </div>
-                </div>
-
-                <img src="https://img.icons8.com/3d-fluency/94/partly-cloudy-day.png" alt="partly-cloudy-day"
-                    class="w-12 h-12 object-contain" />
-                <span class="text-3xl font-bold tracking-tight my-font">10°</span>
-            </div>
-            <div
-                class="flex flex-col items-center justify-between w-22.5 h-77.5 py-8 bg-[#1a1a1a] text-white rounded-[2.5rem] border border-gray-800 shadow-lg ml-6 font-['Inter']">
-                <div class="flex flex-col items-center gap-3 ">
-                    <span class="text-lg font-semibold opacity-60 uppercase tracking-wider">Wed</span>
-                    <div class="w-10 border-t border-white/10">
-                    </div>
-                </div>
-
-                <img src="https://img.icons8.com/?size=100&id=SpZSUswN9tJs&format=png&color=000000"
-                    alt="partly-cloudy-day" class="w-12 h-12 object-contain" />
-                <span class="text-3xl font-bold tracking-tight my-font">15°</span>
-            </div>
-            <div
-                class="flex flex-col items-center justify-between w-22.5 h-77.5 py-8 bg-[#1a1a1a] text-white rounded-[2.5rem] border border-gray-800 shadow-lg ml-6 font-['Inter']">
-                <div class="flex flex-col items-center gap-3 ">
-                    <span class="text-lg font-semibold opacity-60 uppercase tracking-wider">Thu</span>
-                    <div class="w-10 border-t border-white/10">
-                    </div>
-                </div>
-
-                <img src="https://img.icons8.com/?size=100&id=MVj2tmasj0Pp&format=png&color=000000"
-                    alt="partly-cloudy-day" class="w-12 h-12 object-contain" />
-                <span class="text-3xl font-bold tracking-tight my-font">15°</span>
-            </div>
-            <div
-                class="flex flex-col items-center justify-between w-22.5 h-77.5 py-8 bg-[#1a1a1a] text-white rounded-[2.5rem] border border-gray-800 shadow-lg ml-6 font-['Inter']">
-                <div class="flex flex-col items-center gap-3 ">
-                    <span class="text-lg font-semibold opacity-60 uppercase tracking-wider">Fri</span>
-                    <div class="w-10 border-t border-white/10">
-                    </div>
-                </div>
-
-                <img src="https://img.icons8.com/3d-fluency/94/partly-cloudy-day.png" alt="partly-cloudy-day"
-                    class="w-12 h-12 object-contain" />
-                <span class="text-3xl font-bold tracking-tight my-font">15°</span>
-            </div>
-            <div
-                class="flex flex-col items-center justify-between w-22.5 h-77.5 py-8 bg-[#1a1a1a] text-white rounded-[2.5rem] border border-gray-800 shadow-lg ml-6 font-['Inter']">
-                <div class="flex flex-col items-center gap-3 ">
-                    <span class="text-lg font-semibold opacity-60 uppercase tracking-wider">Sat</span>
-                    <div class="w-10 border-t border-white/10">
-                    </div>
-                </div>
-
-                <img src="https://img.icons8.com/3d-fluency/94/partly-cloudy-day.png" alt="partly-cloudy-day"
-                    class="w-12 h-12 object-contain" />
-                <span class="text-3xl font-bold tracking-tight my-font">15°</span>
-            </div>
-            <div
-                class="flex flex-col items-center justify-between w-22.5 h-77.5 py-8 bg-[#1a1a1a] text-white rounded-[2.5rem] border border-gray-800 shadow-lg ml-6 font-['Inter']">
-                <div class="flex flex-col items-center gap-3 ">
-                    <span class="text-lg font-semibold opacity-60 uppercase tracking-wider">Sun</span>
-                    <div class="w-10 border-t border-white/10">
-                    </div>
-                </div>
-
-                <img src="https://img.icons8.com/3d-fluency/94/partly-cloudy-day.png" alt="partly-cloudy-day"
-                    class="w-12 h-12 object-contain" />
-                <span class="text-3xl font-bold tracking-tight my-font">15°</span>
-            </div>
+        <input type="text" placeholder="Search city..." id="search-input" class="block w-full pl-11 pr-4 py-2 rounded-xl text-sm" />
+        <div id="search-dropdown" class="absolute top-full left-0 right-0 mt-1 rounded-xl overflow-hidden z-50 hidden shadow-2xl"></div>
+      </div>
+      <div class="flex items-center gap-4 shrink-0">
+        <span id="status-text" class="text-xs" style="color:var(--text-muted)"></span>
+        <div class="flex p-1 rounded-full gap-0.5" style="background:var(--bg-input)">
+          <button id="btn-light" class="map-btn rounded-full" title="Light mode" style="width:32px;height:32px;border:none;">
+            <i class="fa-regular fa-sun text-xs"></i>
+          </button>
+          <button id="btn-dark" class="map-btn rounded-full" title="Dark mode" style="width:32px;height:32px;border:none;background:var(--accent);color:white;">
+            <i class="fa-solid fa-moon text-xs"></i>
+          </button>
         </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- MAIN -->
+  <main class="px-6 pb-8">
+
+    <!-- Tabs -->
+    <div class="flex items-center gap-8 mb-5">
+      <button id="tab-today"    class="tab-btn text-xl font-bold border-b-2" style="color:var(--text-pri);border-color:var(--accent)">Today</button>
+      <button id="tab-tomorrow" class="tab-btn text-xl border-b-2 border-transparent" style="color:var(--text-sec)">Tomorrow</button>
+      <button id="tab-week"     class="tab-btn text-xl border-b-2 border-transparent" style="color:var(--text-sec)">Next 7 days</button>
+    </div>
+
+    <!-- ROW 1: Forecast + Right Panel -->
+    <div class="flex gap-4 mb-4 items-stretch">
+
+      <!-- Forecast strip -->
+      <div id="forecast-container" class="flex items-stretch p-6 rounded-2xl gap-4 overflow-x-auto flex-1 min-w-0"></div>
+
+      <!-- Right panel -->
+      <div class="flex flex-col gap-4 shrink-0" style="width:260px">
+
+        <!-- Chance of Rain -->
+        <div class="right-panel rounded-2xl p-4 flex flex-col gap-2">
+          <span class="text-sm font-semibold">Chance of rain</span>
+          <div class="flex gap-2" style="height:120px">
+            <div class="flex flex-col justify-between text-right" style="color:var(--text-muted);font-size:10px;min-width:32px;">
+              <span>Rainy</span>
+              <span>Sunny</span>
+              <span>Heavy</span>
+            </div>
+            <div id="rain-bars" class="flex items-end justify-around flex-1 pl-2" style="height:100%"></div>
+          </div>
+          <div id="rain-hours" class="flex justify-around" style="color:var(--text-muted);font-size:9px;padding-left:38px;"></div>
         </div>
+
+        <!-- Other Large Cities -->
+        <div class="right-panel rounded-2xl p-4 flex flex-col gap-3 flex-1">
+          <span class="text-sm font-semibold">Other large cities</span>
+          <div id="cities-scroll" class="flex flex-col gap-2 overflow-y-auto" style="max-height:220px"></div>
         </div>
+
+      </div>
+    </div>
+
+    <!-- ROW 2: Map -->
+    <div class="flex flex-col gap-2">
+      <div class="flex items-center justify-between">
+        <span class="text-sm font-semibold">Global map</span>
+        <button id="view-wide-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
+          style="background:var(--bg-card);border:1px solid var(--border);color:var(--text-pri);cursor:pointer;">
+          <i class="fa-solid fa-up-right-and-down-left-from-center text-[9px]"></i> View wide
+        </button>
+      </div>
+      <div id="world-map-container" style="height:290px;">
+        <div style="position:absolute;top:8px;left:8px;z-index:10;">
+          <button class="map-btn" id="map-reset-btn" title="Reset"><i class="fa-solid fa-rotate-left"></i></button>
         </div>
-    </main>
+        <div style="position:absolute;top:8px;right:8px;z-index:10;">
+          <button class="map-btn" id="map-layers-btn" title="Layers"><i class="fa-solid fa-layer-group"></i></button>
+        </div>
+        <div style="position:absolute;bottom:8px;right:8px;z-index:10;display:flex;flex-direction:column;gap:4px;">
+          <button class="map-btn" id="map-zoom-in" title="Zoom in"><i class="fa-solid fa-plus"></i></button>
+          <button class="map-btn" id="map-zoom-out" title="Zoom out"><i class="fa-solid fa-minus"></i></button>
+        </div>
+        <div id="map-tooltip" class="map-tooltip"></div>
+        <div id="map-svg-wrapper" style="width:100%;height:100%;"></div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- WIDE MAP OVERLAY -->
+  <div id="map-wide-overlay">
+    <div id="map-wide-inner">
+      <div style="position:absolute;top:12px;right:12px;z-index:10;">
+        <button id="close-wide-btn" class="map-btn" style="width:32px;height:32px;" title="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div id="map-wide-svg" style="width:100%;height:100%;"></div>
+      <div id="map-wide-tooltip" class="map-tooltip"></div>
+    </div>
+  </div>
+
+  <script src="script.js" type="module"></script>
 </body>
-
 </html>
