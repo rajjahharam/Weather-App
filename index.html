@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <link rel="icon" href="https://cdn.iconscout.com/icon/free/png-256/free-weather-icon-svg-download-png-1100758.png" type="image/x-icon">
   <style>
+    /* ── TOKENS ─────────────────────────────────────────────────────────────── */
     :root {
       --bg-base:    #0c0c0c;
       --bg-panel:   #111111;
@@ -44,120 +45,422 @@
       --rain-bar:   rgba(59,130,246,0.3);
       --rain-hover: rgba(59,130,246,0.75);
     }
+
+    /* ── RESET ──────────────────────────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; }
     .my-font { font-family: 'Orbitron', sans-serif; }
     body { font-family: 'Inter', sans-serif; background: var(--bg-base); color: var(--text-pri); transition: background 0.3s, color 0.3s; }
 
-    /* Search */
+    /* ── SEARCH ─────────────────────────────────────────────────────────────── */
     #search-input { background: var(--bg-input); color: var(--text-pri); border: none; outline: none; transition: background 0.3s; }
     #search-input::placeholder { color: var(--text-muted); }
     #search-dropdown { background: var(--bg-card); border: 1px solid var(--border); }
     .suggestion-item { color: var(--text-pri); border-bottom: 1px solid var(--border); }
     .suggestion-item:hover { background: var(--bg-input); }
 
-    /* Forecast */
-    #forecast-container { background: var(--bg-panel); border: 1px solid var(--border); scrollbar-width: none; }
+    /* ── FORECAST ───────────────────────────────────────────────────────────── */
+    #forecast-container { background: var(--bg-panel); border: 1px solid var(--border); scrollbar-width: none; overflow-x: auto; }
     #forecast-container::-webkit-scrollbar { display: none; }
 
-    /* Mini cards */
+    /* ── MINI CARDS ─────────────────────────────────────────────────────────── */
     .mini-card { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-pri); flex-shrink: 0; }
     .mini-card .day-label { color: var(--text-sec); }
 
-    /* Right panels */
+    /* ── RIGHT PANELS ───────────────────────────────────────────────────────── */
     .right-panel { background: var(--bg-panel); border: 1px solid var(--border); }
 
-    /* Rain chart */
+    /* ── RAIN CHART ─────────────────────────────────────────────────────────── */
     #rain-bars { border-left: 1px solid var(--border); }
     .rain-bar-col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
     .rain-bar { width: 20px; background: var(--rain-bar); border-radius: 5px 5px 0 0; transition: height 0.7s cubic-bezier(.4,0,.2,1), background 0.2s; cursor: pointer; min-height: 4px; }
     .rain-bar:hover { background: var(--rain-hover); }
 
-    /* City cards */
+    /* ── CITY CARDS ─────────────────────────────────────────────────────────── */
     .city-card { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-pri); cursor: pointer; transition: border-color 0.2s, transform 0.15s; }
     .city-card:hover { border-color: var(--accent); transform: translateX(3px); }
 
-    /* Map */
+    /* ── MAP ────────────────────────────────────────────────────────────────── */
     #world-map-container { position: relative; background: var(--bg-panel); border-radius: 1.25rem; overflow: hidden; border: 1px solid var(--border); }
     #world-map-container svg { width: 100%; height: 100%; display: block; }
     .map-tooltip { position: absolute; background: rgba(15,23,42,0.92); color: #e2e8f0; padding: 3px 9px; border-radius: 6px; font-size: 11px; pointer-events: none; display: none; z-index: 20; white-space: nowrap; }
     .map-btn { width: 26px; height: 26px; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-pri); border-radius: 7px; cursor: pointer; font-size: 10px; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
     .map-btn:hover { background: var(--bg-input); }
 
-    /* Spinner */
+    /* ── SPINNER ────────────────────────────────────────────────────────────── */
     .spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid rgba(255,255,255,0.2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Cities scrollbar */
+    /* ── CITIES SCROLLBAR ───────────────────────────────────────────────────── */
     #cities-scroll { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
     #cities-scroll::-webkit-scrollbar { width: 3px; }
     #cities-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
-    /* Tabs */
-    .tab-btn { background: none; border: none; cursor: pointer; padding-bottom: 4px; font-family: 'Inter', sans-serif; }
+    /* ── TABS ───────────────────────────────────────────────────────────────── */
+    .tab-btn { background: none; border: none; cursor: pointer; padding-bottom: 4px; font-family: 'Inter', sans-serif; white-space: nowrap; }
 
-    /* Wide map overlay */
+    /* ── WIDE MAP OVERLAY ───────────────────────────────────────────────────── */
     #map-wide-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; display: none; align-items: center; justify-content: center; }
     #map-wide-overlay.open { display: flex; }
     #map-wide-inner { background: var(--bg-panel); border-radius: 1.5rem; border: 1px solid var(--border); width: 90vw; height: 80vh; position: relative; overflow: hidden; }
+
+    /* ── LAYOUT (desktop baseline) ──────────────────────────────────────────── */
+    #nav-inner  { display: flex; align-items: center; justify-content: space-between; padding: 14px 32px; gap: 24px; }
+    #nav-theme-wrap { display: flex; }
+    #row-main   { display: flex; gap: 16px; margin-bottom: 16px; align-items: stretch; }
+    #right-col  { display: flex; flex-direction: column; gap: 16px; flex-shrink: 0; width: 260px; }
+    #tabs-row   { display: flex; align-items: center; gap: 32px; margin-bottom: 20px; }
+
+    /* ── HAMBURGER BUTTON ───────────────────────────────────────────────────── */
+    /* Hidden on desktop, shown via media query */
+    #hamburger-btn {
+      display: none;
+      width: 38px; height: 38px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      flex-shrink: 0;
+      padding: 0;
+    }
+    #hamburger-btn span {
+      display: block;
+      width: 18px; height: 2px;
+      background: var(--text-pri);
+      border-radius: 2px;
+      transition: transform 0.25s ease, opacity 0.25s ease;
+    }
+    #hamburger-btn.is-open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    #hamburger-btn.is-open span:nth-child(2) { opacity: 0; }
+    #hamburger-btn.is-open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* ── MOBILE DRAWER OVERLAY ──────────────────────────────────────────────── */
+    /* Always in DOM, hidden by default */
+    #drawer-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 998;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.28s ease;
+    }
+    #drawer-overlay.is-open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    /* ── MOBILE DRAWER ──────────────────────────────────────────────────────── */
+    #drawer {
+      position: fixed;
+      top: 0; right: 0; bottom: 0;
+      width: 270px;
+      background: var(--bg-panel);
+      border-left: 1px solid var(--border);
+      z-index: 999;
+      display: flex;             /* ALWAYS flex — transform hides it */
+      flex-direction: column;
+      padding: 0;
+      transform: translateX(100%);
+      transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: -12px 0 40px rgba(0,0,0,0.5);
+      overflow-y: auto;
+    }
+    #drawer.is-open { transform: translateX(0); }
+
+    /* Drawer internals */
+    .drawer-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 20px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .drawer-logo { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; }
+    .drawer-close {
+      width: 32px; height: 32px;
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px;
+      cursor: pointer; color: var(--text-pri); font-size: 12px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .drawer-section { padding: 18px 20px 0; }
+    .drawer-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+      color: var(--text-muted); text-transform: uppercase; margin-bottom: 10px;
+    }
+    .drawer-divider { height: 1px; background: var(--border); margin: 18px 0 0; }
+
+    /* Drawer search */
+    .drawer-search-wrap { position: relative; }
+    .drawer-search-wrap i {
+      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      color: var(--text-muted); font-size: 12px; pointer-events: none;
+    }
+    #drawer-search-input {
+      width: 100%; background: var(--bg-input); color: var(--text-pri);
+      border: 1px solid var(--border); outline: none; border-radius: 10px;
+      padding: 9px 12px 9px 34px; font-size: 13px; font-family: 'Inter', sans-serif;
+    }
+    #drawer-search-input::placeholder { color: var(--text-muted); }
+    #drawer-search-dropdown {
+      position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden; z-index: 1000;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+      display: none;
+    }
+
+    /* Drawer theme */
+    .drawer-theme-row { display: flex; gap: 8px; }
+    .drawer-theme-btn {
+      flex: 1; padding: 9px 0;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 10px; color: var(--text-sec);
+      font-size: 12px; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
+    .drawer-theme-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    /* Drawer nav links */
+    .drawer-link {
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 12px; border-radius: 10px;
+      color: var(--text-sec); font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: background 0.15s, color 0.15s;
+      margin-bottom: 4px;
+    }
+    .drawer-link:hover { background: var(--bg-card); color: var(--text-pri); }
+    .drawer-link i { width: 16px; text-align: center; color: var(--accent); }
+
+    /* Drawer footer */
+    .drawer-footer {
+      margin-top: auto; padding: 16px 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── RESPONSIVE: TABLET ≤ 900px ─────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      #row-main  { flex-direction: column; }
+      #right-col { width: 100%; flex-direction: row; align-items: stretch; }
+      #right-col > div { flex: 1 1 0; min-width: 0; }
+      #cities-scroll { max-height: 180px; }
+      /* Hamburger replaces theme toggle at tablet/mobile — hide theme wrap */
+      #nav-theme-wrap { display: none !important; }
+      #hamburger-btn  { display: flex; }
+    }
+
+    /* ── RESPONSIVE: MOBILE ≤ 640px ─────────────────────────────────────────── */
+    @media (max-width: 640px) {
+      /* Nav */
+      #nav-inner { padding: 10px 14px; gap: 10px; }
+      #nav-search-wrap { display: none; }
+
+      /* Sticky search bar below header */
+      #mobile-search-bar { display: flex; }
+
+      /* Main padding */
+      main { padding-left: 12px !important; padding-right: 12px !important; padding-top: 8px !important; }
+
+      /* Tabs */
+      #tabs-row { gap: 14px; margin-bottom: 14px; }
+      .tab-btn  { font-size: 15px !important; }
+
+      /* Forecast: left-align so big card is visible first */
+      #forecast-container { justify-content: flex-start !important; padding: 14px !important; gap: 12px !important; }
+
+      /* Right col: vertical stack */
+      #row-main  { flex-direction: column; }
+      #right-col { flex-direction: column; width: 100%; }
+      #cities-scroll { max-height: 200px; }
+
+      /* Map */
+      #world-map-container { height: 210px !important; }
+      #map-wide-inner { width: 96vw !important; height: 72vh !important; }
+    }
+
+    /* ── RESPONSIVE: VERY SMALL ≤ 380px ────────────────────────────────────── */
+    @media (max-width: 380px) {
+      #nav-inner { padding: 8px 10px; }
+      #location-display { font-size: 11px; max-width: 160px; overflow: hidden; text-overflow: ellipsis; }
+      .tab-btn { font-size: 13px !important; }
+    }
+
+    /* Mobile search bar — hidden on desktop, shown on mobile */
+    #mobile-search-bar {
+      display: none;          /* flex when active, set in media query */
+      align-items: center;
+      padding: 6px 14px 10px;
+      background: var(--bg-base);
+    }
+    /* Wrapper gives the icon its positioning context */
+    #mobile-search-bar-inner {
+      position: relative;
+      width: 100%;
+    }
+    #mobile-search-bar-input {
+      width: 100%; background: var(--bg-input); color: var(--text-pri);
+      border: 1px solid var(--border); outline: none;
+      border-radius: 12px; padding: 9px 14px 9px 38px;
+      font-size: 13px; font-family: 'Inter', sans-serif;
+      transition: background 0.3s;
+    }
+    #mobile-search-bar-input::placeholder { color: var(--text-muted); }
+    /* Icon sits inside #mobile-search-bar-inner, perfectly centred vertically */
+    .mobile-search-icon {
+      position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+      color: var(--text-muted); font-size: 13px; pointer-events: none;
+      z-index: 1;
+    }
+    #mobile-search-bar-dropdown {
+      position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden; z-index: 50;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      display: none;
+    }
   </style>
 </head>
 <body>
 
-  <!-- NAVBAR -->
+  <!-- ── DRAWER BACKDROP ─────────────────────────────────────────────────────── -->
+  <div id="drawer-overlay"></div>
+
+  <!-- ── SIDE DRAWER ────────────────────────────────────────────────────────── -->
+  <div id="drawer" role="dialog" aria-modal="true" aria-label="Menu">
+
+    <div class="drawer-head">
+      <div class="drawer-logo">
+        <i class="fa-solid fa-cloud-sun" style="color:var(--accent)"></i>
+        Weather App
+      </div>
+      <button class="drawer-close" id="drawer-close-btn" aria-label="Close menu">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Search -->
+    <div class="drawer-section">
+      <div class="drawer-label">Search city</div>
+      <div class="drawer-search-wrap">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input id="drawer-search-input" type="text" placeholder="Search city..." autocomplete="off" />
+        <div id="drawer-search-dropdown"></div>
+      </div>
+    </div>
+
+    <div class="drawer-divider"></div>
+
+    <!-- Theme -->
+    <div class="drawer-section" style="padding-top:18px;">
+      <div class="drawer-label">Theme</div>
+      <div class="drawer-theme-row">
+        <button id="drawer-btn-light" class="drawer-theme-btn">
+          <i class="fa-regular fa-sun"></i> Light
+        </button>
+        <button id="drawer-btn-dark" class="drawer-theme-btn active">
+          <i class="fa-solid fa-moon"></i> Dark
+        </button>
+      </div>
+    </div>
+
+    <div class="drawer-divider"></div>
+
+    <!-- Navigation -->
+    <div class="drawer-section" style="padding-top:18px;">
+      <div class="drawer-label">Navigate</div>
+      <div class="drawer-link" id="dl-today">
+        <i class="fa-solid fa-sun"></i> Today
+      </div>
+      <div class="drawer-link" id="dl-tomorrow">
+        <i class="fa-solid fa-calendar-day"></i> Tomorrow
+      </div>
+      <div class="drawer-link" id="dl-week">
+        <i class="fa-solid fa-calendar-week"></i> Next 7 days
+      </div>
+    </div>
+
+    <div class="drawer-footer">
+      <span id="drawer-status" style="font-size:11px;color:var(--text-muted);"></span>
+    </div>
+  </div>
+
+  <!-- ── NAVBAR ──────────────────────────────────────────────────────────────── -->
   <header class="w-full">
-    <nav class="flex items-center justify-between px-8 py-4 gap-8">
-      <div class="flex items-center gap-2 shrink-0">
-        <i class="fa-solid fa-location-dot text-sm" style="color:var(--accent)"></i>
-        <span id="location-display" class="text-sm font-semibold whitespace-nowrap"></span>
+    <nav id="nav-inner">
+      <!-- Location -->
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+        <i class="fa-solid fa-location-dot" style="color:var(--accent);font-size:13px;"></i>
+        <span id="location-display" style="font-size:13px;font-weight:600;white-space:nowrap;"></span>
       </div>
-      <div class="relative flex-1 max-w-2xl">
-        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-          <i class="fa-solid fa-magnifying-glass" style="color:var(--text-muted)"></i>
+
+      <!-- Desktop Search -->
+      <div id="nav-search-wrap" style="position:relative;flex:1;max-width:560px;">
+        <div style="position:absolute;inset-y:0;left:0;padding-left:14px;display:flex;align-items:center;pointer-events:none;">
+          <i class="fa-solid fa-magnifying-glass" style="color:var(--text-muted);font-size:13px; position: relative; top: 11px;"></i>
         </div>
-        <input type="text" placeholder="Search city..." id="search-input" class="block w-full pl-11 pr-4 py-2 rounded-xl text-sm" />
-        <div id="search-dropdown" class="absolute top-full left-0 right-0 mt-1 rounded-xl overflow-hidden z-50 hidden shadow-2xl"></div>
+        <input type="text" placeholder="Search city..." id="search-input"
+          style="display:block;width:100%;padding:8px 14px 8px 40px;border-radius:12px;font-size:13px;font-family:'Inter',sans-serif;" />
+        <div id="search-dropdown" style="position:absolute;top:100%;left:0;right:0;margin-top:4px;border-radius:12px;overflow:hidden;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,0.3);display:none;"></div>
       </div>
-      <div class="flex items-center gap-4 shrink-0">
-        <span id="status-text" class="text-xs" style="color:var(--text-muted)"></span>
-        <div class="flex p-1 rounded-full gap-0.5" style="background:var(--bg-input)">
-          <button id="btn-light" class="map-btn rounded-full" title="Light mode" style="width:32px;height:32px;border:none;">
-            <i class="fa-regular fa-sun text-xs"></i>
+
+      <!-- Desktop Theme toggle -->
+      <div id="nav-theme-wrap" style="align-items:center;gap:12px;flex-shrink:0;">
+        <span id="status-text" style="font-size:11px;color:var(--text-muted);"></span>
+        <div style="display:flex;padding:3px;border-radius:9999px;gap:2px;background:var(--bg-input);">
+          <button id="btn-light" class="map-btn" title="Light mode"
+            style="width:32px;height:32px;border-radius:9999px;border:none;">
+            <i class="fa-regular fa-sun" style="font-size:11px;"></i>
           </button>
-          <button id="btn-dark" class="map-btn rounded-full" title="Dark mode" style="width:32px;height:32px;border:none;background:var(--accent);color:white;">
-            <i class="fa-solid fa-moon text-xs"></i>
+          <button id="btn-dark" class="map-btn" title="Dark mode"
+            style="width:32px;height:32px;border-radius:9999px;border:none;background:var(--accent);color:#fff;">
+            <i class="fa-solid fa-moon" style="font-size:11px;"></i>
           </button>
         </div>
       </div>
+
+      <!-- Hamburger (mobile only) -->
+      <button id="hamburger-btn" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
     </nav>
   </header>
 
-  <!-- MAIN -->
+  <!-- ── MOBILE SEARCH BAR (below nav, mobile only) ─────────────────────────── -->
+  <div id="mobile-search-bar">
+    <div id="mobile-search-bar-inner">
+      <i class="fa-solid fa-magnifying-glass mobile-search-icon"></i>
+      <input id="mobile-search-bar-input" type="text" placeholder="Search city..." autocomplete="off" />
+      <div id="mobile-search-bar-dropdown"></div>
+    </div>
+  </div>
+
+  <!-- ── MAIN ───────────────────────────────────────────────────────────────── -->
   <main class="px-6 pb-8">
 
     <!-- Tabs -->
-    <div class="flex items-center gap-8 mb-5">
+    <div id="tabs-row">
       <button id="tab-today"    class="tab-btn text-xl font-bold border-b-2" style="color:var(--text-pri);border-color:var(--accent)">Today</button>
       <button id="tab-tomorrow" class="tab-btn text-xl border-b-2 border-transparent" style="color:var(--text-sec)">Tomorrow</button>
       <button id="tab-week"     class="tab-btn text-xl border-b-2 border-transparent" style="color:var(--text-sec)">Next 7 days</button>
     </div>
 
     <!-- ROW 1: Forecast + Right Panel -->
-    <div class="flex gap-4 mb-4 items-stretch">
+    <div id="row-main">
 
       <!-- Forecast strip -->
       <div id="forecast-container" class="flex items-center justify-center p-6 rounded-2xl gap-8 overflow-x-auto flex-1 min-w-0"></div>
 
-      <!-- Right panel -->
-      <div class="flex flex-col gap-4 shrink-0" style="width:260px">
+      <!-- Right column -->
+      <div id="right-col">
 
         <!-- Chance of Rain -->
         <div class="right-panel rounded-2xl p-4 flex flex-col gap-2">
           <span class="text-sm font-semibold">Chance of rain</span>
           <div class="flex gap-2" style="height:120px">
             <div class="flex flex-col justify-between text-right" style="color:var(--text-muted);font-size:10px;min-width:32px;">
-              <span>Rainy</span>
-              <span>Sunny</span>
-              <span>Heavy</span>
+              <span>Rainy</span><span>Sunny</span><span>Heavy</span>
             </div>
             <div id="rain-bars" class="flex items-end justify-around flex-1 pl-2" style="height:100%"></div>
           </div>
@@ -177,9 +480,9 @@
     <div class="flex flex-col gap-2">
       <div class="flex items-center justify-between">
         <span class="text-sm font-semibold">Global map</span>
-        <button id="view-wide-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
-          style="background:var(--bg-card);border:1px solid var(--border);color:var(--text-pri);cursor:pointer;">
-          <i class="fa-solid fa-up-right-and-down-left-from-center text-[9px]"></i> View wide
+        <button id="view-wide-btn"
+          style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:600;background:var(--bg-card);border:1px solid var(--border);color:var(--text-pri);cursor:pointer;">
+          <i class="fa-solid fa-up-right-and-down-left-from-center" style="font-size:9px;"></i> View wide
         </button>
       </div>
       <div id="world-map-container" style="height:290px;">
@@ -200,7 +503,7 @@
 
   </main>
 
-  <!-- WIDE MAP OVERLAY -->
+  <!-- ── WIDE MAP OVERLAY ────────────────────────────────────────────────────── -->
   <div id="map-wide-overlay">
     <div id="map-wide-inner">
       <div style="position:absolute;top:12px;right:12px;z-index:10;">
@@ -212,6 +515,143 @@
       <div id="map-wide-tooltip" class="map-tooltip"></div>
     </div>
   </div>
+
+  <!-- ── HAMBURGER + DRAWER JS ───────────────────────────────────────────────── -->
+  <script>
+    (function () {
+      const hamburger   = document.getElementById('hamburger-btn');
+      const drawer      = document.getElementById('drawer');
+      const overlay     = document.getElementById('drawer-overlay');
+      const closeBtn    = document.getElementById('drawer-close-btn');
+
+      function openDrawer() {
+        drawer.classList.add('is-open');
+        overlay.classList.add('is-open');
+        hamburger.classList.add('is-open');
+        hamburger.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
+      }
+      function closeDrawer() {
+        drawer.classList.remove('is-open');
+        overlay.classList.remove('is-open');
+        hamburger.classList.remove('is-open');
+        hamburger.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+      }
+
+      hamburger.addEventListener('click', openDrawer);
+      closeBtn.addEventListener('click', closeDrawer);
+      overlay.addEventListener('click', closeDrawer);
+
+      // Drawer nav links → click real tab buttons
+      document.getElementById('dl-today').addEventListener('click', function () {
+        document.getElementById('tab-today').click(); closeDrawer();
+      });
+      document.getElementById('dl-tomorrow').addEventListener('click', function () {
+        document.getElementById('tab-tomorrow').click(); closeDrawer();
+      });
+      document.getElementById('dl-week').addEventListener('click', function () {
+        document.getElementById('tab-week').click(); closeDrawer();
+      });
+
+      // Drawer theme — mirrors desktop buttons
+      var dLight = document.getElementById('drawer-btn-light');
+      var dDark  = document.getElementById('drawer-btn-dark');
+
+      function syncDrawerTheme(isDark) {
+        dDark.classList.toggle('active', isDark);
+        dLight.classList.toggle('active', !isDark);
+      }
+
+      dLight.addEventListener('click', function () {
+        document.getElementById('btn-light').click();
+        syncDrawerTheme(false);
+      });
+      dDark.addEventListener('click', function () {
+        document.getElementById('btn-dark').click();
+        syncDrawerTheme(true);
+      });
+      document.getElementById('btn-light').addEventListener('click', function () { syncDrawerTheme(false); });
+      document.getElementById('btn-dark').addEventListener('click', function () { syncDrawerTheme(true); });
+
+      // ── MOBILE SEARCH BAR (below nav) ────────────────────────────────────────
+      var API_KEY = '9f53fcb90d5e4ad5a8673831262704';
+
+      function wireSearchInput(inputEl, dropdownEl, onSelect) {
+        var timer = null;
+        inputEl.addEventListener('input', function () {
+          clearTimeout(timer);
+          var v = inputEl.value.trim();
+          if (v.length < 2) { dropdownEl.style.display = 'none'; return; }
+          timer = setTimeout(async function () {
+            try {
+              var res  = await fetch('https://api.weatherapi.com/v1/search.json?key=' + API_KEY + '&q=' + encodeURIComponent(v));
+              var data = await res.json();
+              if (!data.length) { dropdownEl.style.display = 'none'; return; }
+              dropdownEl.innerHTML = data.slice(0, 6).map(function (loc) {
+                return '<div class="suggestion-item" style="padding:10px 14px;font-size:13px;cursor:pointer;" data-query="' + loc.name + ', ' + loc.country + '">'
+                  + '<span style="font-weight:600;">' + loc.name + '</span>'
+                  + '<span style="color:var(--text-muted);font-size:11px;margin-left:4px;">' + (loc.region ? loc.region + ', ' : '') + loc.country + '</span>'
+                  + '</div>';
+              }).join('');
+              dropdownEl.style.display = 'block';
+              dropdownEl.querySelectorAll('.suggestion-item').forEach(function (item) {
+                item.addEventListener('click', function () {
+                  onSelect(item.dataset.query);
+                  dropdownEl.style.display = 'none';
+                });
+              });
+            } catch (e) { console.error(e); }
+          }, 300);
+        });
+        inputEl.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' && inputEl.value.trim()) {
+            dropdownEl.style.display = 'none';
+            onSelect(inputEl.value.trim());
+          }
+          if (e.key === 'Escape') dropdownEl.style.display = 'none';
+        });
+      }
+
+      // Wire mobile bar search — fires weather via the desktop search-input's Enter event
+      var mBarInput = document.getElementById('mobile-search-bar-input');
+      var mBarDrop  = document.getElementById('mobile-search-bar-dropdown');
+      var desktopInput = document.getElementById('search-input');
+
+      wireSearchInput(mBarInput, mBarDrop, function (query) {
+        desktopInput.value = query;
+        mBarInput.value = query;
+        desktopInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      });
+
+      // Close bar dropdown on outside click
+      document.addEventListener('click', function (e) {
+        if (!mBarInput.contains(e.target) && !mBarDrop.contains(e.target)) {
+          mBarDrop.style.display = 'none';
+        }
+      });
+
+      // ── DRAWER SEARCH ─────────────────────────────────────────────────────────
+      var dSearchInput = document.getElementById('drawer-search-input');
+      var dSearchDrop  = document.getElementById('drawer-search-dropdown');
+
+      wireSearchInput(dSearchInput, dSearchDrop, function (query) {
+        desktopInput.value = query;
+        dSearchInput.value = query;
+        desktopInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+        closeDrawer();
+      });
+
+      // ── MIRROR STATUS TEXT TO DRAWER ──────────────────────────────────────────
+      window.addEventListener('load', function () {
+        var st  = document.getElementById('status-text');
+        var dst = document.getElementById('drawer-status');
+        if (!st || !dst) return;
+        new MutationObserver(function () { dst.innerHTML = st.innerHTML; })
+          .observe(st, { childList: true, subtree: true, characterData: true });
+      });
+    })();
+  </script>
 
   <script src="script.js" type="module"></script>
 </body>

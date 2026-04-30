@@ -2,46 +2,61 @@
 const API_KEY = "9f53fcb90d5e4ad5a8673831262704";
 
 // ── DOM REFS ──────────────────────────────────────────────────────────────────
-const searchInput       = document.getElementById("search-input");
-const searchDropdown    = document.getElementById("search-dropdown");
-const locationDisplay   = document.getElementById("location-display");
+const searchInput = document.getElementById("search-input");
+const searchDropdown = document.getElementById("search-dropdown");
+const locationDisplay = document.getElementById("location-display");
 const forecastContainer = document.getElementById("forecast-container");
-const statusText        = document.getElementById("status-text");
-const rainBars          = document.getElementById("rain-bars");
-const rainHours         = document.getElementById("rain-hours");
-const citiesScroll      = document.getElementById("cities-scroll");
+const statusText = document.getElementById("status-text");
+const rainBars = document.getElementById("rain-bars");
+const rainHours = document.getElementById("rain-hours");
+const citiesScroll = document.getElementById("cities-scroll");
 
 // ── ICON MAP ──────────────────────────────────────────────────────────────────
 const iconMapping = {
-  "Sunny":                       "https://img.icons8.com/3d-fluency/94/summer.png",
-  "Clear":                       "https://img.icons8.com/3d-fluency/94/summer.png",
-  "Partly cloudy":               "https://img.icons8.com/3d-fluency/94/partly-cloudy-day.png",
-  "Cloudy":                      "https://img.icons8.com/3d-fluency/94/cloud.png",
-  "Overcast":                    "https://img.icons8.com/3d-fluency/94/cloud.png",
-  "Patchy rain possible":        "https://img.icons8.com/3d-fluency/94/light-rain.png",
-  "Light rain":                  "https://img.icons8.com/3d-fluency/94/rain.png",
-  "Moderate rain":               "https://img.icons8.com/?size=100&id=SpZSUswN9tJs&format=png",
-  "Heavy rain":                  "https://img.icons8.com/3d-fluency/94/storm.png",
-  "Thundery outbreaks possible": "https://img.icons8.com/3d-fluency/94/storm.png",
-  "Snow":                        "https://img.icons8.com/3d-fluency/94/snowstorm.png",
-  "Blowing snow":                "https://img.icons8.com/3d-fluency/94/snowstorm.png",
-  "Blizzard":                    "https://img.icons8.com/3d-fluency/94/snowstorm.png",
-  "Fog":                         "https://img.icons8.com/?size=100&id=qHIFUjYhnsFU&format=png&color=000000",
-  "Freezing fog":                "https://img.icons8.com/?size=100&id=qHIFUjYhnsFU&format=png&color=000000",
-  "Mist":                        "https://img.icons8.com/?size=100&id=qHIFUjYhnsFU&format=png&color=000000",
+  Sunny: "https://img.icons8.com/3d-fluency/94/summer.png",
+  Clear: "https://img.icons8.com/3d-fluency/94/summer.png",
+  "Partly cloudy": "https://img.icons8.com/3d-fluency/94/partly-cloudy-day.png",
+  Cloudy: "https://img.icons8.com/3d-fluency/94/cloud.png",
+  Overcast: "https://img.icons8.com/3d-fluency/94/cloud.png",
+  "Patchy rain possible": "https://img.icons8.com/3d-fluency/94/light-rain.png",
+  "Light rain": "https://img.icons8.com/?size=100&id=QZJFPE7TNi5Q&format=png&color=000000",
+  "Moderate rain":
+    "https://img.icons8.com/?size=100&id=SpZSUswN9tJs&format=png",
+  "Heavy rain": "https://img.icons8.com/3d-fluency/94/storm.png",
+  "Thundery outbreaks possible":
+    "https://img.icons8.com/3d-fluency/94/storm.png",
+  Snow: "https://img.icons8.com/?size=100&id=mn6t2pvcYFMM&format=png&color=000000",
+  "Blowing snow":
+    "https://img.icons8.com/?size=100&id=mn6t2pvcYFMM&format=png&color=000000",
+  Blizzard:
+    "https://img.icons8.com/?size=100&id=mn6t2pvcYFMM&format=png&color=000000",
+  Fog: "https://img.icons8.com/?size=100&id=qHIFUjYhnsFU&format=png&color=000000",
+  "Freezing fog":
+    "https://img.icons8.com/?size=100&id=7tEHHH5dn7A3&format=png&color=000000",
+  Mist: "https://img.icons8.com/?size=100&id=qHIFUjYhnsFU&format=png&color=000000",
 };
-const fallbackIcon = "https://img.icons8.com/3d-fluency/94/partly-cloudy-day.png";
-const getIcon = c => iconMapping[c] ?? fallbackIcon;
+const fallbackIcon =
+  "https://img.icons8.com/3d-fluency/94/partly-cloudy-day.png";
+const getIcon = (c) => iconMapping[c] ?? fallbackIcon;
 
 // ── DEFAULT CITIES ────────────────────────────────────────────────────────────
-const DEFAULT_CITIES = ["New York", "London", "Tokyo", "Dubai", "Sydney", "Paris", "Singapore", "Mumbai"];
+const DEFAULT_CITIES = [
+  "New York",
+  "London",
+  "Tokyo",
+  "Dubai",
+  "Sydney",
+  "Paris",
+  "Singapore",
+  "Mumbai",
+];
 
 // ── STATE ─────────────────────────────────────────────────────────────────────
 let currentData = null;
-let activeTab   = "today";
-let isDark      = true;
-let mapSvgEl    = null;
-let wideSvgEl   = null;
+let activeTab = "today";
+let isDark = true;
+let mapSvgEl = null;
+let wideSvgEl = null;
 
 // ── STATUS ────────────────────────────────────────────────────────────────────
 function setStatus(msg, loading = false) {
@@ -52,35 +67,38 @@ function setStatus(msg, loading = false) {
 
 // ── THEME TOGGLE ──────────────────────────────────────────────────────────────
 const btnLight = document.getElementById("btn-light");
-const btnDark  = document.getElementById("btn-dark");
+const btnDark = document.getElementById("btn-dark");
 
 function applyTheme(dark) {
   isDark = dark;
   document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
-  btnDark.style.background  = dark  ? "var(--accent)"    : "transparent";
-  btnDark.style.color       = dark  ? "white"             : "var(--text-sec)";
-  btnLight.style.background = !dark ? "var(--accent)"    : "transparent";
-  btnLight.style.color      = !dark ? "white"             : "var(--text-sec)";
+  btnDark.style.background = dark ? "var(--accent)" : "transparent";
+  btnDark.style.color = dark ? "white" : "var(--text-sec)";
+  btnLight.style.background = !dark ? "var(--accent)" : "transparent";
+  btnLight.style.color = !dark ? "white" : "var(--text-sec)";
   if (mapSvgEl) {
-    mapSvgEl.querySelectorAll("path,polygon").forEach(el => {
+    mapSvgEl.querySelectorAll("path,polygon").forEach((el) => {
       if (el.dataset.active === "1") return;
-      el.style.fill   = "var(--map-land)";
+      el.style.fill = "var(--map-land)";
       el.style.stroke = "var(--map-stroke)";
     });
   }
 }
 
 btnLight.addEventListener("click", () => applyTheme(false));
-btnDark.addEventListener("click",  () => applyTheme(true));
+btnDark.addEventListener("click", () => applyTheme(true));
 
 // ── FETCH WEATHER ─────────────────────────────────────────────────────────────
 async function updateWeather(query) {
   setStatus("Loading…", true);
   try {
-    const url  = `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${encodeURIComponent(query)}&days=7&aqi=no&alerts=no`;
-    const res  = await fetch(url);
+    const url = `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${encodeURIComponent(query)}&days=7&aqi=no&alerts=no`;
+    const res = await fetch(url);
     const data = await res.json();
-    if (data.error) { setStatus("City not found"); return; }
+    if (data.error) {
+      setStatus("City not found");
+      return;
+    }
     currentData = data;
     setStatus("");
     renderAll(data);
@@ -93,9 +111,10 @@ async function updateWeather(query) {
 // ── RENDER ALL ────────────────────────────────────────────────────────────────
 function renderAll(data) {
   locationDisplay.textContent = `${data.location.name}, ${data.location.country}`;
-  if      (activeTab === "today")    renderTodayForecast(data);
-  else if (activeTab === "tomorrow") renderSingleDayForecast(data.forecast.forecastday[1]);
-  else                               renderWeekForecast(data.forecast.forecastday);
+  if (activeTab === "today") renderTodayForecast(data);
+  else if (activeTab === "tomorrow")
+    renderSingleDayForecast(data.forecast.forecastday[1]);
+  else renderWeekForecast(data.forecast.forecastday);
   renderRainChart(data);
   updateLocationPin(data);
   highlightMapCountry(data.location.country);
@@ -103,12 +122,15 @@ function renderAll(data) {
 
 // ── TODAY CARD ────────────────────────────────────────────────────────────────
 function renderTodayForecast(data) {
-  const cur   = data.current;
+  const cur = data.current;
   const today = data.forecast.forecastday[0];
-  const now   = new Date(data.location.localtime);
-  const day   = now.toLocaleDateString("en-US", { weekday: "long" });
-  const time  = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
-  const icon  = getIcon(cur.condition.text);
+  const now = new Date(data.location.localtime);
+  const day = now.toLocaleDateString("en-US", { weekday: "long" });
+  const time = now.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const icon = getIcon(cur.condition.text);
 
   let html = `
     <div class="flex flex-col gap-4 bg-[#c0d8f0] rounded-3xl p-6 text-[#1a1a1a] shadow-xl flex-shrink-0 font-sans" style="min-width:16rem;width:16rem;height:315px">
@@ -130,7 +152,9 @@ function renderTodayForecast(data) {
       </div>
     </div>`;
 
-  data.forecast.forecastday.slice(1).forEach(d => { html += buildMiniCard(d); });
+  data.forecast.forecastday.slice(1).forEach((d) => {
+    html += buildMiniCard(d);
+  });
   forecastContainer.innerHTML = html;
 }
 
@@ -138,7 +162,7 @@ function renderTodayForecast(data) {
 function renderSingleDayForecast(d) {
   if (!d) return;
   const date = new Date(d.date);
-  const day  = date.toLocaleDateString("en-US", { weekday: "long" });
+  const day = date.toLocaleDateString("en-US", { weekday: "long" });
   const icon = getIcon(d.day.condition.text);
 
   forecastContainer.innerHTML = `
@@ -170,7 +194,7 @@ function renderWeekForecast(days) {
 // ── MINI CARD ─────────────────────────────────────────────────────────────────
 function buildMiniCard(d) {
   const date = new Date(d.date + "T12:00:00");
-  const day  = date.toLocaleDateString("en-US", { weekday: "short" });
+  const day = date.toLocaleDateString("en-US", { weekday: "short" });
   const icon = getIcon(d.day.condition.text);
   return `
     <div class="mini-card flex flex-col items-center justify-between rounded-[2.5rem] py-7 px-3 shadow-md flex-shrink-0" style="min-width:80px;width:84px;min-height:180px;height:320px">
@@ -185,38 +209,44 @@ function buildMiniCard(d) {
 
 // ── RAIN CHART ────────────────────────────────────────────────────────────────
 function renderRainChart(data) {
-  const hours         = data.forecast.forecastday[0].hour;
+  const hours = data.forecast.forecastday[0].hour;
   const pickedIndices = [10, 11, 12, 13, 14, 15];
-  const picked        = pickedIndices.map(i => hours[i] || hours[hours.length - 1]);
+  const picked = pickedIndices.map((i) => hours[i] || hours[hours.length - 1]);
 
-  rainBars.innerHTML = picked.map(h => {
-    const pct = h.chance_of_rain;
-    const heightPct = Math.max(4, pct);
-    return `<div class="rain-bar-col"><div class="rain-bar" style="height:${heightPct}%;" title="${pct}% chance of rain"></div></div>`;
-  }).join("");
+  rainBars.innerHTML = picked
+    .map((h) => {
+      const pct = h.chance_of_rain;
+      const heightPct = Math.max(4, pct);
+      return `<div class="rain-bar-col"><div class="rain-bar" style="height:${heightPct}%;" title="${pct}% chance of rain"></div></div>`;
+    })
+    .join("");
 
-  rainHours.innerHTML = picked.map(h => {
-    const t = new Date(h.time);
-    return `<span>${t.toLocaleTimeString("en-US", { hour: "numeric", hour12: true })}</span>`;
-  }).join("");
+  rainHours.innerHTML = picked
+    .map((h) => {
+      const t = new Date(h.time);
+      return `<span>${t.toLocaleTimeString("en-US", { hour: "numeric", hour12: true })}</span>`;
+    })
+    .join("");
 }
 
 // ── CITIES PANEL ──────────────────────────────────────────────────────────────
 async function loadCities(citiesToLoad) {
   citiesScroll.innerHTML = `<div style="color:var(--text-muted);font-size:12px;text-align:center;padding:8px;">Loading…</div>`;
   const results = await Promise.allSettled(
-    citiesToLoad.map(city =>
-      fetch(`https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${encodeURIComponent(city)}&aqi=no`)
-        .then(r => r.json())
-    )
+    citiesToLoad.map((city) =>
+      fetch(
+        `https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${encodeURIComponent(city)}&aqi=no`,
+      ).then((r) => r.json()),
+    ),
   );
   citiesScroll.innerHTML = "";
-  results.forEach(r => {
+  results.forEach((r) => {
     if (r.status !== "fulfilled" || r.value.error) return;
-    const d    = r.value;
+    const d = r.value;
     const icon = getIcon(d.current.condition.text);
-    const div  = document.createElement("div");
-    div.className = "city-card flex items-center justify-between rounded-xl px-3 py-2.5";
+    const div = document.createElement("div");
+    div.className =
+      "city-card flex items-center justify-between rounded-xl px-3 py-2.5";
     div.innerHTML = `
       <div class="flex flex-col gap-0.5">
         <span style="font-size:10px;color:var(--text-muted);">${d.location.country}</span>
@@ -236,19 +266,23 @@ async function loadCities(citiesToLoad) {
 }
 
 // ── TAB SWITCHING ─────────────────────────────────────────────────────────────
-["tab-today", "tab-tomorrow", "tab-week"].forEach(id => {
+["tab-today", "tab-tomorrow", "tab-week"].forEach((id) => {
   document.getElementById(id).addEventListener("click", () => {
-    const tabMap = { "tab-today": "today", "tab-tomorrow": "tomorrow", "tab-week": "week" };
+    const tabMap = {
+      "tab-today": "today",
+      "tab-tomorrow": "tomorrow",
+      "tab-week": "week",
+    };
     activeTab = tabMap[id];
-    ["tab-today", "tab-tomorrow", "tab-week"].forEach(tid => {
+    ["tab-today", "tab-tomorrow", "tab-week"].forEach((tid) => {
       const btn = document.getElementById(tid);
-      btn.style.color       = "var(--text-sec)";
-      btn.style.fontWeight  = "normal";
+      btn.style.color = "var(--text-sec)";
+      btn.style.fontWeight = "normal";
       btn.style.borderColor = "transparent";
     });
     const active = document.getElementById(id);
-    active.style.color       = "var(--text-pri)";
-    active.style.fontWeight  = "bold";
+    active.style.color = "var(--text-pri)";
+    active.style.fontWeight = "bold";
     active.style.borderColor = "var(--accent)";
     if (currentData) renderAll(currentData);
   });
@@ -260,66 +294,100 @@ let searchTimer = null;
 searchInput.addEventListener("input", () => {
   clearTimeout(searchTimer);
   const v = searchInput.value.trim();
-  if (v.length < 2) { searchDropdown.classList.add("hidden"); return; }
+  if (v.length < 2) {
+    searchDropdown.classList.add("hidden");
+    return;
+  }
   searchTimer = setTimeout(() => fetchSuggestions(v), 300);
 });
 
-searchInput.addEventListener("keydown", e => {
-  if (e.key === "Enter")  { searchDropdown.classList.add("hidden"); if (searchInput.value.trim()) updateWeather(searchInput.value.trim()); }
+searchInput.addEventListener("keydown", (e) => {
+  console.log("keydown keys", e);
+ 
+  
+
+  if (e.key === "Enter") {
+    searchDropdown.classList.add("hidden");
+    if (searchInput.value.trim()) updateWeather(searchInput.value.trim());
+  }
   if (e.key === "Escape") searchDropdown.classList.add("hidden");
 });
 
-document.addEventListener("click", e => {
+document.addEventListener("click", (e) => {
   if (!searchInput.contains(e.target) && !searchDropdown.contains(e.target))
     searchDropdown.classList.add("hidden");
 });
 
 async function fetchSuggestions(q) {
   try {
-    const res  = await fetch(`https://api.weatherapi.com/v1/search.json?key=${API_KEY}&q=${encodeURIComponent(q)}`);
+    const res = await fetch(
+      `https://api.weatherapi.com/v1/search.json?key=${API_KEY}&q=${encodeURIComponent(q)}`,
+    );
     const data = await res.json();
-    if (!data.length) { searchDropdown.classList.add("hidden"); return; }
-    searchDropdown.innerHTML = data.slice(0, 6).map(loc => `
+    if (!data.length) {
+      searchDropdown.classList.add("hidden");
+      return;
+    }
+    searchDropdown.innerHTML = data
+      .slice(0, 6)
+      .map(
+        (loc) => `
       <div class="suggestion-item px-4 py-3 text-sm cursor-pointer transition-colors" data-query="${loc.name}, ${loc.country}">
         <span class="font-medium">${loc.name}</span>
         <span style="color:var(--text-muted)" class="ml-1 text-xs">${loc.region ? loc.region + ", " : ""}${loc.country}</span>
-      </div>`).join("");
+      </div>`,
+      )
+      .join("");
     searchDropdown.classList.remove("hidden");
-    searchDropdown.querySelectorAll(".suggestion-item").forEach(item => {
+    searchDropdown.querySelectorAll(".suggestion-item").forEach((item) => {
       item.addEventListener("click", () => {
         searchInput.value = item.dataset.query;
         searchDropdown.classList.add("hidden");
         updateWeather(item.dataset.query);
       });
     });
-  } catch (e) { console.error(e); }
+  } catch (e) {
+    console.error(e);
+  }
 }
 
 // ── WORLD MAP ─────────────────────────────────────────────────────────────────
-const MAP_SVG_URL = "https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg";
+const MAP_SVG_URL =
+  "https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg";
 
 function setupMapInteractivity(svg, tooltipEl, containerEl, countries) {
-  countries.forEach(el => {
-    const name = el.getAttribute("title") || el.getAttribute("inkscape:label") || el.getAttribute("id") || "";
-    el.style.cursor      = "pointer";
-    el.style.transition  = "fill 0.18s";
-    el.style.fill        = "var(--map-land)";
-    el.style.stroke      = "var(--map-stroke)";
+  countries.forEach((el) => {
+    const name =
+      el.getAttribute("title") ||
+      el.getAttribute("inkscape:label") ||
+      el.getAttribute("id") ||
+      "";
+    el.style.cursor = "pointer";
+    el.style.transition = "fill 0.18s";
+    el.style.fill = "var(--map-land)";
+    el.style.stroke = "var(--map-stroke)";
     el.style.strokeWidth = "0.5";
 
-    el.addEventListener("mousemove", e => {
+    el.addEventListener("mousemove", (e) => {
       const rect = containerEl.getBoundingClientRect();
-      tooltipEl.style.left    = (e.clientX - rect.left + 12) + "px";
-      tooltipEl.style.top     = (e.clientY - rect.top - 28) + "px";
+      tooltipEl.style.left = e.clientX - rect.left + 12 + "px";
+      tooltipEl.style.top = e.clientY - rect.top - 28 + "px";
       tooltipEl.style.display = name ? "block" : "none";
-      tooltipEl.textContent   = name;
+      tooltipEl.textContent = name;
     });
-    el.addEventListener("mouseleave", () => { tooltipEl.style.display = "none"; });
-    el.addEventListener("mouseenter", () => { if (el.dataset.active !== "1") el.style.fill = "var(--map-hover)"; });
+    el.addEventListener("mouseleave", () => {
+      tooltipEl.style.display = "none";
+    });
+    el.addEventListener("mouseenter", () => {
+      if (el.dataset.active !== "1") el.style.fill = "var(--map-hover)";
+    });
     el.addEventListener("click", () => {
       if (!name) return;
-      countries.forEach(c => { c.style.fill = "var(--map-land)"; c.dataset.active = "0"; });
-      el.style.fill     = "var(--map-active)";
+      countries.forEach((c) => {
+        c.style.fill = "var(--map-land)";
+        c.dataset.active = "0";
+      });
+      el.style.fill = "var(--map-active)";
       el.dataset.active = "1";
       updateWeather(name);
       searchInput.value = name;
@@ -328,48 +396,76 @@ function setupMapInteractivity(svg, tooltipEl, containerEl, countries) {
 }
 
 function makeZoomPan(svg) {
-  let zoom = 1, px = 0, py = 0;
-  let dragging = false, startX = 0, startY = 0, lastPx = 0, lastPy = 0;
+  let zoom = 1,
+    px = 0,
+    py = 0;
+  let dragging = false,
+    startX = 0,
+    startY = 0,
+    lastPx = 0,
+    lastPy = 0;
 
   function applyTransform() {
     svg.style.transformOrigin = "0 0";
-    svg.style.transform       = `translate(${px}px,${py}px) scale(${zoom})`;
+    svg.style.transform = `translate(${px}px,${py}px) scale(${zoom})`;
   }
 
-  svg.addEventListener("wheel", e => {
-    e.preventDefault();
-    zoom = Math.min(8, Math.max(0.8, zoom * (e.deltaY > 0 ? 0.85 : 1.18)));
-    applyTransform();
-  }, { passive: false });
+  svg.addEventListener(
+    "wheel",
+    (e) => {
+      e.preventDefault();
+      zoom = Math.min(8, Math.max(0.8, zoom * (e.deltaY > 0 ? 0.85 : 1.18)));
+      applyTransform();
+    },
+    { passive: false },
+  );
 
-  svg.addEventListener("mousedown", e => {
-    dragging = true; startX = e.clientX; startY = e.clientY; lastPx = px; lastPy = py;
+  svg.addEventListener("mousedown", (e) => {
+    dragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    lastPx = px;
+    lastPy = py;
     svg.style.cursor = "grabbing";
   });
-  document.addEventListener("mousemove", e => {
+  document.addEventListener("mousemove", (e) => {
     if (!dragging) return;
     px = lastPx + (e.clientX - startX);
     py = lastPy + (e.clientY - startY);
     applyTransform();
   });
-  document.addEventListener("mouseup", () => { dragging = false; svg.style.cursor = "default"; });
+  document.addEventListener("mouseup", () => {
+    dragging = false;
+    svg.style.cursor = "default";
+  });
 
   return {
-    zoomIn()  { zoom = Math.min(8, zoom * 1.25); applyTransform(); },
-    zoomOut() { zoom = Math.max(0.8, zoom / 1.25); applyTransform(); },
-    reset()   { zoom = 1; px = 0; py = 0; applyTransform(); },
+    zoomIn() {
+      zoom = Math.min(8, zoom * 1.25);
+      applyTransform();
+    },
+    zoomOut() {
+      zoom = Math.max(0.8, zoom / 1.25);
+      applyTransform();
+    },
+    reset() {
+      zoom = 1;
+      px = 0;
+      py = 0;
+      applyTransform();
+    },
   };
 }
 
 let smallMapControls = null;
 
 async function loadMap() {
-  const wrapper   = document.getElementById("map-svg-wrapper");
+  const wrapper = document.getElementById("map-svg-wrapper");
   const tooltipEl = document.getElementById("map-tooltip");
   const container = document.getElementById("world-map-container");
 
   try {
-    const res  = await fetch(MAP_SVG_URL);
+    const res = await fetch(MAP_SVG_URL);
     const text = await res.text();
     wrapper.innerHTML = text;
 
@@ -379,7 +475,7 @@ async function loadMap() {
     // Remove hardcoded width/height so it fills the container via CSS
     svg.removeAttribute("width");
     svg.removeAttribute("height");
-    svg.style.width  = "100%";
+    svg.style.width = "100%";
     svg.style.height = "100%";
     svg.style.cursor = "default";
 
@@ -391,9 +487,15 @@ async function loadMap() {
     setupMapInteractivity(svg, tooltipEl, container, countries);
     smallMapControls = makeZoomPan(svg);
 
-    document.getElementById("map-zoom-in").addEventListener("click",  () => smallMapControls.zoomIn());
-    document.getElementById("map-zoom-out").addEventListener("click", () => smallMapControls.zoomOut());
-    document.getElementById("map-reset-btn").addEventListener("click", () => smallMapControls.reset());
+    document
+      .getElementById("map-zoom-in")
+      .addEventListener("click", () => smallMapControls.zoomIn());
+    document
+      .getElementById("map-zoom-out")
+      .addEventListener("click", () => smallMapControls.zoomOut());
+    document
+      .getElementById("map-reset-btn")
+      .addEventListener("click", () => smallMapControls.reset());
   } catch (err) {
     console.error("Map load failed:", err);
     wrapper.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted);font-size:13px;">Map unavailable — use search above</div>`;
@@ -410,11 +512,11 @@ document.getElementById("view-wide-btn").addEventListener("click", async () => {
   const wideWrapper = document.getElementById("map-wide-svg");
   if (wideWrapper.querySelector("svg")) return; // already loaded
 
-  const tooltipEl   = document.getElementById("map-wide-tooltip");
+  const tooltipEl = document.getElementById("map-wide-tooltip");
   const containerEl = document.getElementById("map-wide-inner");
 
   try {
-    const res  = await fetch(MAP_SVG_URL);
+    const res = await fetch(MAP_SVG_URL);
     const text = await res.text();
     wideWrapper.innerHTML = text;
 
@@ -423,7 +525,7 @@ document.getElementById("view-wide-btn").addEventListener("click", async () => {
 
     svg.removeAttribute("width");
     svg.removeAttribute("height");
-    svg.style.width  = "100%";
+    svg.style.width = "100%";
     svg.style.height = "100%";
     svg.style.cursor = "default";
     svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
@@ -447,7 +549,7 @@ document.getElementById("view-wide-btn").addEventListener("click", async () => {
 document.getElementById("close-wide-btn").addEventListener("click", () => {
   document.getElementById("map-wide-overlay").classList.remove("open");
 });
-document.getElementById("map-wide-overlay").addEventListener("click", e => {
+document.getElementById("map-wide-overlay").addEventListener("click", (e) => {
   if (e.target === document.getElementById("map-wide-overlay"))
     document.getElementById("map-wide-overlay").classList.remove("open");
 });
@@ -459,8 +561,8 @@ document.getElementById("map-wide-overlay").addEventListener("click", e => {
 //   lat:  +90..-90   →  svgY: 0..1050
 function latLonToSvgCoords(svg, lat, lon) {
   const vb = svg.viewBox.baseVal;
-  const W  = vb.width  || 2058;
-  const H  = vb.height || 1050;
+  const W = vb.width || 2058;
+  const H = vb.height || 1050;
   const x0 = vb.x || 0;
   const y0 = vb.y || 0;
   return {
@@ -475,19 +577,25 @@ function placePinInSvg(svg, lat, lon, label) {
 
   const { x, y } = latLonToSvgCoords(svg, lat, lon);
   const ns = "http://www.w3.org/2000/svg";
-  const g  = document.createElementNS(ns, "g");
+  const g = document.createElementNS(ns, "g");
   g.id = "loc-pin-group";
   g.style.pointerEvents = "none";
 
   // Glow
   const glow = document.createElementNS(ns, "circle");
-  glow.setAttribute("cx", x); glow.setAttribute("cy", y); glow.setAttribute("r", "12");
+  glow.setAttribute("cx", x);
+  glow.setAttribute("cy", y);
+  glow.setAttribute("r", "12");
   glow.setAttribute("fill", "rgba(59,130,246,0.22)");
 
   // Dot
   const dot = document.createElementNS(ns, "circle");
-  dot.setAttribute("cx", x); dot.setAttribute("cy", y); dot.setAttribute("r", "5");
-  dot.setAttribute("fill", "#3b82f6"); dot.setAttribute("stroke", "white"); dot.setAttribute("stroke-width", "2");
+  dot.setAttribute("cx", x);
+  dot.setAttribute("cy", y);
+  dot.setAttribute("r", "5");
+  dot.setAttribute("fill", "#3b82f6");
+  dot.setAttribute("stroke", "white");
+  dot.setAttribute("stroke-width", "2");
 
   // Label
   const charW = 6.2;
@@ -497,27 +605,34 @@ function placePinInSvg(svg, lat, lon, label) {
   const ty = y - 20;
 
   const rect = document.createElementNS(ns, "rect");
-  rect.setAttribute("x", tx); rect.setAttribute("y", ty - textH + 4);
-  rect.setAttribute("width", textW); rect.setAttribute("height", textH);
-  rect.setAttribute("rx", "4"); rect.setAttribute("fill", "rgba(15,23,42,0.88)");
+  rect.setAttribute("x", tx);
+  rect.setAttribute("y", ty - textH + 4);
+  rect.setAttribute("width", textW);
+  rect.setAttribute("height", textH);
+  rect.setAttribute("rx", "4");
+  rect.setAttribute("fill", "rgba(15,23,42,0.88)");
 
   const text = document.createElementNS(ns, "text");
-  text.setAttribute("x", x); text.setAttribute("y", ty);
+  text.setAttribute("x", x);
+  text.setAttribute("y", ty);
   text.setAttribute("text-anchor", "middle");
   text.setAttribute("font-size", "10");
   text.setAttribute("font-family", "Inter, sans-serif");
   text.setAttribute("fill", "white");
   text.textContent = label;
 
-  g.appendChild(glow); g.appendChild(rect); g.appendChild(text); g.appendChild(dot);
+  g.appendChild(glow);
+  g.appendChild(rect);
+  g.appendChild(text);
+  g.appendChild(dot);
   svg.appendChild(g);
 }
 
 function updateLocationPin(data) {
-  const lat  = data.location.lat;
-  const lon  = data.location.lon;
+  const lat = data.location.lat;
+  const lon = data.location.lon;
   const name = `${data.location.name}, ${data.location.country}`;
-  [mapSvgEl, wideSvgEl].forEach(svg => {
+  [mapSvgEl, wideSvgEl].forEach((svg) => {
     if (!svg) return;
     placePinInSvg(svg, lat, lon, name);
   });
@@ -525,12 +640,17 @@ function updateLocationPin(data) {
 
 // ── HIGHLIGHT MAP COUNTRY ─────────────────────────────────────────────────────
 function highlightMapCountry(countryName) {
-  [mapSvgEl, wideSvgEl].forEach(svg => {
+  [mapSvgEl, wideSvgEl].forEach((svg) => {
     if (!svg) return;
-    svg.querySelectorAll("path,polygon").forEach(el => {
-      const n     = (el.getAttribute("title") || el.getAttribute("inkscape:label") || el.getAttribute("id") || "").toLowerCase();
+    svg.querySelectorAll("path,polygon").forEach((el) => {
+      const n = (
+        el.getAttribute("title") ||
+        el.getAttribute("inkscape:label") ||
+        el.getAttribute("id") ||
+        ""
+      ).toLowerCase();
       const match = n === countryName.toLowerCase();
-      el.style.fill     = match ? "var(--map-active)" : "var(--map-land)";
+      el.style.fill = match ? "var(--map-active)" : "var(--map-land)";
       el.dataset.active = match ? "1" : "0";
     });
   });
@@ -540,7 +660,9 @@ function highlightMapCountry(countryName) {
 let layersOn = false;
 document.getElementById("map-layers-btn").addEventListener("click", () => {
   layersOn = !layersOn;
-  document.getElementById("map-svg-wrapper").style.opacity = layersOn ? "0.7" : "1";
+  document.getElementById("map-svg-wrapper").style.opacity = layersOn
+    ? "0.7"
+    : "1";
 });
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
